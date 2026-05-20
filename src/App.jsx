@@ -428,6 +428,7 @@ export default function App() {
     if (familyCode.trim().length < 4) { setCodeError(t("Geçersiz kod", "Ungültiger Code")); return; }
     setCodeLoading(true); setCodeError("");
     try {
+      await signInAnonymously(auth);
       const fam = await store.getFamilyByCode(familyCode.trim().toUpperCase());
       if (!fam) { setCodeError(t("Kod bulunamadı", "Code nicht gefunden")); setCodeLoading(false); return; }
       const kids = await store.getChildren(fam.id);
