@@ -336,7 +336,9 @@ export default function App() {
   useEffect(() => { getRedirectResult(auth).catch(() => {}); }, []);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (u) => {
+    const timeout = setTimeout(() => setAuthLoading(false), 6000);
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      clearTimeout(timeout);
       try {
         setUser(u);
         if (u && !u.isAnonymous) {
@@ -348,13 +350,11 @@ export default function App() {
           else await loadFamilyData(ud.familyId);
         } else if (u && u.isAnonymous) {
           const session = JSON.parse(localStorage.getItem("sk_child") || "null");
-          const ud = await store.getUser(u.uid);
+          const ud = await store.getUser(u.uid).catch(() => null);
           if (ud?.familyId) {
-            // Anonim ebeveyn (Yeni Aile Kur ile oluşturulmuş)
             setUserDoc(ud);
             await loadFamilyData(ud.familyId);
           } else if (session?.familyId) {
-            // Anonim çocuk
             setChildSession(session);
             await loadFamilyData(session.familyId, session.childId);
           }
@@ -371,6 +371,7 @@ export default function App() {
         setAuthLoading(false);
       }
     });
+    return () => { clearTimeout(timeout); unsub(); };
   }, []);
 
   const loadFamilyData = async (familyId, childIdToSelect) => {
