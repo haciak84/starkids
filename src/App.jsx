@@ -603,7 +603,8 @@ export default function App() {
   const fontLink = <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />;
 
   // AD + KOD ile giriş
-  if (!user && loginScreen === "join") return (
+  const showLogin = !userDoc && !childSession;
+  if (showLogin && loginScreen === "join") return (
     <div style={loginBg}>
       {fontLink}
       <div style={{ fontSize: 48 }}>⭐</div>
@@ -619,7 +620,7 @@ export default function App() {
   );
 
   // YENİ AİLE KUR
-  if (!user && loginScreen === "newFamily") return (
+  if (showLogin && loginScreen === "newFamily") return (
     <div style={loginBg}>
       {fontLink}
       <div style={{ fontSize: 48 }}>👨‍👩‍👦</div>
@@ -635,7 +636,7 @@ export default function App() {
   );
 
   // ANA GİRİŞ EKRANI
-  if (!user) return (
+  if (showLogin) return (
     <div style={loginBg}>
       {fontLink}
       <div style={{ textAlign: "center" }}>
