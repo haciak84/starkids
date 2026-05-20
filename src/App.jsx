@@ -481,13 +481,30 @@ export default function App() {
 
   const approveDay = async (date) => {
     if (!family || !selectedChild) return;
+    // Boş bırakılan cezalı görevlere otomatik ceza uygula
+    let penaltyTotal = 0;
+    const updatedLog = { ...todayLog };
+    for (const task of relevantTasks) {
+      if (task.penalty < 0 && !todayLog[task.id]) {
+        updatedLog[task.id] = "penalty";
+        penaltyTotal += task.penalty;
+      }
+    }
+    if (penaltyTotal < 0) {
+      await store.saveDayLog(family.id, selectedChild.id, date, updatedLog);
+      setTodayLog(updatedLog);
+    }
     await store.setApproval(family.id, selectedChild.id, date, true);
     const streak = (selectedChild.streakCount || 0) + 1;
     let bonus = 0;
     for (const sb of STREAK_BONUSES) { if (streak === sb.days) { bonus = sb.bonus; setStreakAnim(sb); setTimeout(() => setStreakAnim(null), 3000); } }
-    await store.updateChild(family.id, selectedChild.id, { streakCount: streak, lastStreakDate: date, balance: (selectedChild.balance || 0) + bonus, totalEarned: (selectedChild.totalEarned || 0) + bonus });
-    setSelectedChild(prev => ({ ...prev, streakCount: streak, balance: (prev.balance || 0) + bonus, totalEarned: (prev.totalEarned || 0) + bonus }));
-    showToast(t("✅ Gün onaylandı!", "✅ Tag genehmigt!"));
+    const newBalance = (selectedChild.balance || 0) + penaltyTotal + bonus;
+    await store.updateChild(family.id, selectedChild.id, { streakCount: streak, lastStreakDate: date, balance: newBalance, totalEarned: (selectedChild.totalEarned || 0) + bonus });
+    setSelectedChild(prev => ({ ...prev, streakCount: streak, balance: newBalance, totalEarned: (prev.totalEarned || 0) + bonus }));
+    const msg = penaltyTotal < 0
+      ? t(`✅ Onaylandı! ${penaltyTotal} ceza uygulandı.`, `✅ Genehmigt! ${penaltyTotal} Strafe angewendet.`)
+      : t("✅ Gün onaylandı!", "✅ Tag genehmigt!");
+    showToast(msg);
   };
 
   const saveTask = async (task) => {
