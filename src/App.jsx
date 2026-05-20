@@ -337,20 +337,25 @@ export default function App() {
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        const ud = await store.getUser(u.uid);
-        setUserDoc(ud);
-        if (!ud) setSetupStep("role");
-        else loadFamilyData(ud.familyId);
-      } else {
-        const session = JSON.parse(localStorage.getItem("sk_child") || "null");
-        if (session?.familyId) {
-          setChildSession(session);
-          await loadFamilyData(session.familyId, session.childId);
+      try {
+        setUser(u);
+        if (u) {
+          const ud = await store.getUser(u.uid);
+          setUserDoc(ud);
+          if (!ud) setSetupStep("role");
+          else await loadFamilyData(ud.familyId);
+        } else {
+          const session = JSON.parse(localStorage.getItem("sk_child") || "null");
+          if (session?.familyId) {
+            setChildSession(session);
+            await loadFamilyData(session.familyId, session.childId);
+          }
         }
+      } catch (e) {
+        console.error("Auth yükleme hatası:", e);
+      } finally {
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
     });
   }, []);
 
@@ -358,8 +363,10 @@ export default function App() {
     if (!familyId) return;
     let fam = await store.getFamily(familyId);
     if (fam && !fam.familyCode) {
-      const code = await store.ensureFamilyCode(familyId);
-      fam = { ...fam, familyCode: code };
+      try {
+        const code = await store.ensureFamilyCode(familyId);
+        fam = { ...fam, familyCode: code };
+      } catch (e) { console.warn("familyCode üretilemedi:", e); }
     }
     setFamily(fam);
     if (fam) {
