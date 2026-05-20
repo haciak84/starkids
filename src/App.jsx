@@ -335,14 +335,6 @@ export default function App() {
 
   useEffect(() => { getRedirectResult(auth).catch(() => {}); }, []);
 
-  // Uygulama açılırken anonim auth — Firestore erişimi için gerekli
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      if (!u) signInAnonymously(auth).catch(() => {});
-    });
-    return unsub;
-  }, []);
-
   useEffect(() => {
     const timeout = setTimeout(() => setAuthLoading(false), 6000);
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -367,11 +359,9 @@ export default function App() {
             await loadFamilyData(session.familyId, session.childId);
           }
         } else {
-          const session = JSON.parse(localStorage.getItem("sk_child") || "null");
-          if (session?.familyId) {
-            setChildSession(session);
-            await loadFamilyData(session.familyId, session.childId);
-          }
+          // Oturum yok — anonim giriş yap, sonra session kontrolü
+          await signInAnonymously(auth);
+          // onAuthStateChanged tekrar tetiklenir, bu kez u.isAnonymous = true
         }
       } catch (e) {
         console.error("Auth yükleme hatası:", e);
