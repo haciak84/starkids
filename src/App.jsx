@@ -817,7 +817,7 @@ export default function App() {
 
       {/* BOTTOM NAV */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "#0d0d1a", borderTop: "1px solid #333", display: "flex", padding: "8px 0 max(8px, env(safe-area-inset-bottom))", zIndex: 1000 }}>
-        {[{ id: "home", icon: "🏠", l: { tr: "Ana Sayfa", de: "Start" } }, { id: "daily", icon: "📝", l: { tr: "Görevler", de: "Aufgaben" } }, { id: "stats", icon: "📊", l: { tr: "İstatistik", de: "Statistik" } }, ...(childSession ? [] : [{ id: "parent", icon: "⚙️", l: { tr: "Ebeveyn", de: "Eltern" } }])].map(tab =>
+        {[{ id: "home", icon: "🏠", l: { tr: "Ana Sayfa", de: "Start" } }, { id: "daily", icon: "📝", l: { tr: "Görevler", de: "Aufgaben" } }, { id: "stats", icon: "📊", l: { tr: "İstatistik", de: "Statistik" } }, ...(!childSession && userDoc ? [{ id: "parent", icon: "⚙️", l: { tr: "Ebeveyn", de: "Eltern" } }] : [])].map(tab =>
           <button key={tab.id} onClick={() => { if (tab.id === "parent" && view !== "parent") setShowPin(true); else setView(tab.id); }} style={{ flex: 1, background: "none", border: "none", color: view === tab.id ? "#4ECDC4" : "#666", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 0", fontFamily: "'Nunito', sans-serif" }}><span style={{ fontSize: 22 }}>{tab.icon}</span><span>{tab.l[lang]}</span></button>
         )}
       </div>
