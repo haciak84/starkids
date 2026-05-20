@@ -380,6 +380,7 @@ export default function App() {
           setSelectedChild(kids[0]);
         }
       });
+      store.onFamilySnapshot(familyId, (f) => { if (f) setFamily(f); });
       store.onTasksSnapshot(familyId, async (t) => {
         if (t?.length > 0) {
           // Varsayılan görevlerdeki değişiklikleri otomatik uygula
