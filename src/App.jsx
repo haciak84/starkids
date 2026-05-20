@@ -426,12 +426,16 @@ export default function App() {
   const lookupFamilyCode = async () => {
     if (familyCode.trim().length < 4) { setCodeError(lang === "tr" ? "Geçersiz kod" : "Ungültiger Code"); return; }
     setCodeLoading(true); setCodeError("");
-    const fam = await store.getFamilyByCode(familyCode);
-    if (!fam) { setCodeError(lang === "tr" ? "Kod bulunamadı" : "Code nicht gefunden"); setCodeLoading(false); return; }
-    setFoundFamily(fam);
-    const kids = await store.getChildren(fam.id);
-    setChildren(kids);
-    setChildLoginStep("select");
+    try {
+      const fam = await store.getFamilyByCode(familyCode);
+      if (!fam) { setCodeError(lang === "tr" ? "Kod bulunamadı" : "Code nicht gefunden"); setCodeLoading(false); return; }
+      setFoundFamily(fam);
+      const kids = await store.getChildren(fam.id);
+      setChildren(kids);
+      setChildLoginStep("select");
+    } catch (e) {
+      setCodeError("Hata: " + (e.code || e.message));
+    }
     setCodeLoading(false);
   };
 
