@@ -750,8 +750,13 @@ export default function App() {
           <button onClick={() => signOut(auth)} style={{ ...btnStyle, background: "#3a1a1a", color: "#FF6B6B", width: "100%", marginBottom: 16 }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
           <div style={cardStyle}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#888" }}>🏠 {t("Aile Kodu", "Familiencode")}</div>
-            <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 8, color: "#FFD700", textAlign: "center" }}>{family?.familyCode || "—"}</div>
-            <div style={{ fontSize: 11, color: "#555", textAlign: "center", marginTop: 4 }}>{t("Çocuklar bu kodla giriş yapar", "Kinder melden sich mit diesem Code an")}</div>
+            <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: 10, color: "#FFD700", textAlign: "center" }}>{family?.familyCode || "—"}</div>
+            <div style={{ fontSize: 11, color: "#555", textAlign: "center", marginTop: 4, marginBottom: 10 }}>{t("Çocuklar bu kodla giriş yapar", "Kinder melden sich mit diesem Code an")}</div>
+            <button onClick={async () => {
+              const code = await store.ensureFamilyCode(family.id, true);
+              setFamily(f => ({ ...f, familyCode: code }));
+              showToast(t("✅ Yeni kod: " + code, "✅ Neuer Code: " + code));
+            }} style={{ ...btnStyle, background: "#1a1a2e", color: "#888", border: "1px solid #444", width: "100%", fontSize: 12 }}>🔄 {t("Yeni Kod Oluştur", "Neuen Code erstellen")}</button>
           </div>
         </>}
       </div>
