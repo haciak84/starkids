@@ -742,7 +742,7 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#aaa", marginBottom: 6 }}><span>{doneTasks}/{totalTasks}</span><span>%{dayPct}</span></div>
             <div style={{ height: 6, background: "#333", borderRadius: 3 }}><div style={{ height: "100%", width: `${dayPct}%`, background: dayPct === 100 ? "#4ECDC4" : "#45B7D1", borderRadius: 3, transition: "width 0.3s" }} /></div></div>
           <WeeklyChart familyId={family.id} childId={selectedChild.id} tasks={tasks} lang={lang} />
-          <button onClick={() => childSession ? childLogout() : signOut(auth)} style={{ ...btnStyle, background: "#1a1a1a", color: "#666", width: "100%", marginTop: 8, fontSize: 13, border: "1px solid #333" }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
+          <button onClick={() => { if (childSession) { childLogout(); } else { setUserDoc(null); setFamily(null); setChildren([]); setSelectedChild(null); signOut(auth); } }} style={{ ...btnStyle, background: "#1a1a1a", color: "#666", width: "100%", marginTop: 8, fontSize: 13, border: "1px solid #333" }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
         </>}
 
         {view === "daily" && <>
@@ -805,7 +805,7 @@ export default function App() {
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>🎯 {t("Manuel Puan", "Manuelle Punkte")} — {selectedChild.avatar} {selectedChild.name}</div>
             <div style={{ display: "flex", gap: 6 }}>{[-50, -10, -5, 5, 10, 50].map(val => <button key={val} onClick={async () => { const nb = (selectedChild.balance || 0) + val; const nt = val > 0 ? (selectedChild.totalEarned || 0) + val : (selectedChild.totalEarned || 0); await store.updateChild(family.id, selectedChild.id, { balance: nb, totalEarned: nt }); setSelectedChild(prev => ({ ...prev, balance: nb, totalEarned: nt })); showToast(`${val > 0 ? "+" : ""}${val}`); }} style={{ ...btnStyle, flex: 1, padding: "10px 2px", fontSize: 12, background: val > 0 ? "#1a3a2a" : "#3a1a1a", color: val > 0 ? "#4ECDC4" : "#FF6B6B" }}>{val > 0 ? "+" : ""}{val}</button>)}</div>
           </div>
-          <button onClick={() => signOut(auth)} style={{ ...btnStyle, background: "#3a1a1a", color: "#FF6B6B", width: "100%", marginBottom: 16 }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
+          <button onClick={() => { setUserDoc(null); setFamily(null); setChildren([]); setSelectedChild(null); signOut(auth); }} style={{ ...btnStyle, background: "#3a1a1a", color: "#FF6B6B", width: "100%", marginBottom: 16 }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
           <div style={cardStyle}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#888" }}>🏠 {t("Aile Kodu", "Familiencode")}</div>
             <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: 10, color: "#FFD700", textAlign: "center" }}>{family?.familyCode || "—"}</div>
