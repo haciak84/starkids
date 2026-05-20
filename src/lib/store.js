@@ -6,7 +6,10 @@ import {
 import { db } from "./firebase";
 
 // ============ FAMILY ============
+const genFamilyCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+
 export async function createFamily(userId, displayName, email, pin) {
+  const code = genFamilyCode();
   const familyRef = doc(db, "families", userId);
   await setDoc(familyRef, {
     ownerId: userId,
@@ -14,10 +17,11 @@ export async function createFamily(userId, displayName, email, pin) {
     ownerEmail: email,
     parentPin: pin,
     lang: "tr",
+    familyCode: code,
     createdAt: serverTimestamp(),
     parents: [userId],
   });
-  // Also set user doc
+  await setDoc(doc(db, "familyCodes", code), { familyId: userId });
   await setDoc(doc(db, "users", userId), {
     uid: userId,
     email,
@@ -26,7 +30,13 @@ export async function createFamily(userId, displayName, email, pin) {
     familyId: userId,
     createdAt: serverTimestamp(),
   });
-  return userId; // familyId = ownerId
+  return userId;
+}
+
+export async function getFamilyByCode(code) {
+  const snap = await getDoc(doc(db, "familyCodes", code.toUpperCase().trim()));
+  if (!snap.exists()) return null;
+  return getFamily(snap.data().familyId);
 }
 
 export async function getFamily(familyId) {

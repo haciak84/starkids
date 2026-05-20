@@ -57,7 +57,7 @@ const DEFAULT_TASKS = [
   { id: "t17", cat: "ev", name: { tr: "Balık besleme", de: "Fische füttern" }, pts: 3, penalty: -5, freq: "daily", active: true },
   { id: "t18", cat: "ev", name: { tr: "Kediyle ilgilenme (mama/su)", de: "Katze versorgen (Futter/Wasser)" }, pts: 3, penalty: 0, freq: "daily", active: true },
   { id: "t19", cat: "ev", name: { tr: "Süpürme / Staubsaugen", de: "Staubsaugen" }, pts: 5, penalty: 0, freq: "weekly", active: true },
-  { id: "t20", cat: "egitim", name: { tr: "Ödevi kendi başına yapma", de: "Hausaufgaben selbstständig" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t20", cat: "egitim", name: { tr: "Ödevi kendi başına yapma", de: "Hausaufgaben selbstständig" }, pts: 2, penalty: 0, freq: "daily", active: true },
   { id: "t21", cat: "egitim", name: { tr: "Kitap okuma (30dk)", de: "Lesen (30 Min.)" }, pts: 10, penalty: 0, freq: "daily", active: true },
   { id: "t22", cat: "egitim", name: { tr: "Kitap okuma (1 saat)", de: "Lesen (1 Stunde)" }, pts: 25, penalty: 0, freq: "daily", active: true },
   { id: "t23", cat: "egitim", name: { tr: "Derslere aktif katılım", de: "Aktive Teilnahme am Unterricht" }, pts: 5, penalty: 0, freq: "daily", active: true },
@@ -81,6 +81,15 @@ const DEFAULT_TASKS = [
   { id: "t41", cat: "hobi", name: { tr: "3D printer projesi", de: "3D-Drucker Projekt" }, pts: 10, penalty: 0, freq: "weekly", active: true },
   { id: "t42", cat: "hobi", name: { tr: "Kodlama/programlama çalışması", de: "Programmieren üben" }, pts: 10, penalty: 0, freq: "weekly", active: true },
   { id: "t43", cat: "hobi", name: { tr: "Arkadaşla sosyal aktivite", de: "Soziale Aktivität mit Freunden" }, pts: 5, penalty: 0, freq: "weekly", active: true },
+  { id: "t44", cat: "egitim", name: { tr: "Anton App (30dk)", de: "Anton App (30 Min.)" }, pts: 8, penalty: 0, freq: "daily", active: true },
+  { id: "t45", cat: "egitim", name: { tr: "Anton App (1 saat)", de: "Anton App (1 Std.)" }, pts: 24, penalty: 0, freq: "daily", active: true },
+  { id: "t46", cat: "egitim", name: { tr: "El yazısı Almanca cümle (15dk)", de: "Handschrift Deutsche Sätze (15 Min.)" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t47", cat: "bakim", name: { tr: "Yüzme kıyafetlerini önceden hazırlamak", de: "Schwimmsachen vorbereiten" }, pts: 3, penalty: 0, freq: "weekly", active: true },
+  { id: "t48", cat: "bakim", name: { tr: "Yüzmeden dönünce ıslaklıkları çıkarıp asmak", de: "Nasse Sachen nach dem Schwimmen aufhängen" }, pts: 3, penalty: 0, freq: "weekly", active: true },
+  { id: "t49", cat: "bakim", name: { tr: "Spor günü kıyafetlerini önceden hazırlamak", de: "Sportkleidung vorher bereitlegen" }, pts: 3, penalty: 0, freq: "weekly", active: true },
+  { id: "t50", cat: "bakim", name: { tr: "Spor dönüşü terli/nemli kıyafetleri ayırmak", de: "Feuchte Sportkleider nach dem Sport trennen" }, pts: 3, penalty: 0, freq: "weekly", active: true },
+  { id: "t51", cat: "egitim", name: { tr: "Ders programını günlük hazırlamak", de: "Stundenplan täglich vorbereiten" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t52", cat: "egitim", name: { tr: "Ekstra ders çalışması", de: "Zusätzliches Lernen" }, pts: 15, penalty: 0, freq: "daily", active: true },
 ];
 
 const DEFAULT_REWARDS = {
@@ -312,6 +321,12 @@ export default function App() {
   const [setupPin, setSetupPin] = useState("");
   const [newChildName, setNewChildName] = useState("");
   const [newChildAvatar, setNewChildAvatar] = useState("🦁");
+  const [childSession, setChildSession] = useState(() => { try { return JSON.parse(localStorage.getItem("sk_child")) || null; } catch { return null; } });
+  const [childLoginStep, setChildLoginStep] = useState(null);
+  const [familyCode, setFamilyCode] = useState("");
+  const [foundFamily, setFoundFamily] = useState(null);
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState("");
 
   const t = (tr, de) => lang === "tr" ? tr : de;
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
@@ -326,18 +341,32 @@ export default function App() {
         setUserDoc(ud);
         if (!ud) setSetupStep("role");
         else loadFamilyData(ud.familyId);
+      } else {
+        const session = JSON.parse(localStorage.getItem("sk_child") || "null");
+        if (session?.familyId) {
+          setChildSession(session);
+          await loadFamilyData(session.familyId, session.childId);
+        }
       }
       setAuthLoading(false);
     });
   }, []);
 
-  const loadFamilyData = async (familyId) => {
+  const loadFamilyData = async (familyId, childIdToSelect) => {
     if (!familyId) return;
     const fam = await store.getFamily(familyId);
     setFamily(fam);
     if (fam) {
       setLang(fam.lang || "tr");
-      store.onChildrenSnapshot(familyId, (kids) => { setChildren(kids); if (kids.length > 0 && !selectedChild) setSelectedChild(kids[0]); });
+      store.onChildrenSnapshot(familyId, (kids) => {
+        setChildren(kids);
+        if (childIdToSelect) {
+          const child = kids.find(k => k.id === childIdToSelect);
+          setSelectedChild(child || kids[0] || null);
+        } else if (kids.length > 0 && !selectedChild) {
+          setSelectedChild(kids[0]);
+        }
+      });
       store.onTasksSnapshot(familyId, (t) => { if (t?.length > 0) setTasks(t); });
       store.onRewardsSnapshot(familyId, (r) => { if (r && Object.keys(r).length > 0) setRewards(r); });
     }
@@ -349,6 +378,35 @@ export default function App() {
   }, [family, selectedChild]);
 
   const signInWithGoogle = async () => { try { await signInWithPopup(auth, googleProvider); } catch (e) { if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') { try { await signInWithRedirect(auth, googleProvider); } catch (e2) { showToast("Hata: " + e2.message); } } else { showToast("Hata: " + e.message); } } };
+
+  const lookupFamilyCode = async () => {
+    if (familyCode.trim().length < 4) { setCodeError(lang === "tr" ? "Geçersiz kod" : "Ungültiger Code"); return; }
+    setCodeLoading(true); setCodeError("");
+    const fam = await store.getFamilyByCode(familyCode);
+    if (!fam) { setCodeError(lang === "tr" ? "Kod bulunamadı" : "Code nicht gefunden"); setCodeLoading(false); return; }
+    setFoundFamily(fam);
+    const kids = await store.getChildren(fam.id);
+    setChildren(kids);
+    setChildLoginStep("select");
+    setCodeLoading(false);
+  };
+
+  const selectChildAndLogin = (child) => {
+    const session = { familyId: foundFamily.id, childId: child.id };
+    localStorage.setItem("sk_child", JSON.stringify(session));
+    setChildSession(session);
+    loadFamilyData(foundFamily.id, child.id);
+    setChildLoginStep(null);
+  };
+
+  const childLogout = () => {
+    localStorage.removeItem("sk_child");
+    setChildSession(null);
+    setFamily(null);
+    setChildren([]);
+    setSelectedChild(null);
+    setView("home");
+  };
 
   const completeParentSetup = async () => {
     if (setupPin.length !== 4) return;
@@ -381,11 +439,12 @@ export default function App() {
     if (old === "done") delta -= task.pts; else if (old === "penalty") delta -= (task.penalty || 0);
     if (status === "done") delta += task.pts; else if (status === "penalty") delta += (task.penalty || 0);
     const newLog = { ...todayLog, [taskId]: status };
-    await store.saveDayLog(family.id, selectedChild.id, todayStr(), newLog);
+    setTodayLog(newLog); // Optimistic — hızlı tıklamada stale state'i önler
     const nb = (selectedChild.balance || 0) + delta;
     const nt = (selectedChild.totalEarned || 0) + (delta > 0 ? delta : 0);
-    await store.updateChild(family.id, selectedChild.id, { balance: nb, totalEarned: nt });
     setSelectedChild(prev => ({ ...prev, balance: nb, totalEarned: nt }));
+    await store.saveDayLog(family.id, selectedChild.id, todayStr(), newLog);
+    await store.updateChild(family.id, selectedChild.id, { balance: nb, totalEarned: nt });
   };
 
   const handleWheelResult = async (reward, tier) => {
@@ -436,14 +495,53 @@ export default function App() {
   // LOADING
   if (authLoading) return (<div style={{ minHeight: "100vh", background: "#0a0a1a", display: "flex", alignItems: "center", justifyContent: "center" }}><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" /><div style={{ textAlign: "center", color: "#4ECDC4", fontFamily: "'Nunito', sans-serif" }}><div style={{ fontSize: 48, marginBottom: 16 }}>⭐</div><div style={{ fontSize: 20, fontWeight: 800 }}>StarKids</div></div></div>);
 
+  // CHILD LOGIN — code entry
+  if (!user && childLoginStep === "code") return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #0a0a1a, #16213e, #0a0a1a)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 20, padding: 24, fontFamily: "'Nunito', sans-serif" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+      <div style={{ fontSize: 52 }}>🔑</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: "#e0e0e0" }}>{t("Aile Kodunu Gir", "Familiencode eingeben")}</div>
+      <input value={familyCode} onChange={e => setFamilyCode(e.target.value.toUpperCase())} placeholder="ABC123" maxLength={6} style={{ ...inputStyle, width: 200, textAlign: "center", fontSize: 28, letterSpacing: 10, fontWeight: 800 }} />
+      {codeError && <div style={{ color: "#FF6B6B", fontSize: 13 }}>{codeError}</div>}
+      <button onClick={lookupFamilyCode} disabled={codeLoading} style={{ ...btnStyle, background: "#4ECDC4", padding: "14px 40px", fontSize: 16 }}>{codeLoading ? "..." : t("Devam →", "Weiter →")}</button>
+      <button onClick={() => setChildLoginStep(null)} style={{ background: "none", border: "none", color: "#888", fontSize: 13, cursor: "pointer" }}>{t("← Geri", "← Zurück")}</button>
+    </div>
+  );
+
+  // CHILD LOGIN — select child
+  if (!user && childLoginStep === "select") return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #0a0a1a, #16213e, #0a0a1a)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16, padding: 24, fontFamily: "'Nunito', sans-serif" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+      <div style={{ fontSize: 52 }}>👤</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: "#e0e0e0" }}>{t("Sen kimsin?", "Wer bist du?")}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
+        {children.map(child => (
+          <button key={child.id} onClick={() => selectChildAndLogin(child)} style={{ ...btnStyle, background: "#1a2a3a", border: "2px solid #4ECDC4", borderRadius: 16, padding: "16px 20px", fontSize: 18, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 32 }}>{child.avatar}</span>
+            <span style={{ fontWeight: 800 }}>{child.name}</span>
+          </button>
+        ))}
+      </div>
+      <button onClick={() => setChildLoginStep("code")} style={{ background: "none", border: "none", color: "#888", fontSize: 13, cursor: "pointer" }}>{t("← Geri", "← Zurück")}</button>
+    </div>
+  );
+
   // LOGIN
   if (!user) return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #0a0a1a, #16213e, #0a0a1a)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 30 }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #0a0a1a, #16213e, #0a0a1a)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 24, padding: 24 }}>
       <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
       <div style={{ textAlign: "center", fontFamily: "'Nunito', sans-serif" }}><div style={{ fontSize: 80, marginBottom: 10 }}>⭐</div><div style={{ fontSize: 36, fontWeight: 900, color: "#FFD700", letterSpacing: 2 }}>StarKids</div><div style={{ fontSize: 14, color: "#888", marginTop: 8 }}>{t("Görev & Ödül Sistemi", "Aufgaben & Belohnungssystem")}</div></div>
-      <button onClick={signInWithGoogle} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 32px", background: "#fff", color: "#333", border: "none", borderRadius: 50, fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'Nunito', sans-serif", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}>
+      <button onClick={() => setChildLoginStep("code")} style={{ ...btnStyle, background: "linear-gradient(135deg, #4ECDC4, #45B7D1)", padding: "18px 36px", fontSize: 18, borderRadius: 50, width: "100%", maxWidth: 320, fontFamily: "'Nunito', sans-serif" }}>
+        👶 {t("Çocuk Girişi", "Kind-Anmeldung")}
+      </button>
+      <div style={{ width: "100%", maxWidth: 320, display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ flex: 1, height: 1, background: "#333" }} />
+        <span style={{ color: "#555", fontSize: 12, fontFamily: "'Nunito', sans-serif" }}>{t("veya ebeveyn", "oder Elternteil")}</span>
+        <div style={{ flex: 1, height: 1, background: "#333" }} />
+      </div>
+      <button onClick={signInWithGoogle} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 28px", background: "#fff", color: "#333", border: "none", borderRadius: 50, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Nunito', sans-serif", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", width: "100%", maxWidth: 320, justifyContent: "center" }}>
         <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-        Google {t("ile Giriş Yap", "Anmelden")}
+        Google {t("ile Ebeveyn Girişi", "Elternteil-Anmeldung")}
       </button>
       <div style={{ display: "flex", gap: 12 }}>
         <button onClick={() => setLang("tr")} style={{ ...btnStyle, background: lang === "tr" ? "#4ECDC4" : "#333", padding: "8px 16px", fontSize: 13 }}>🇹🇷 Türkçe</button>
@@ -526,7 +624,7 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#aaa", marginBottom: 6 }}><span>{doneTasks}/{totalTasks}</span><span>%{dayPct}</span></div>
             <div style={{ height: 6, background: "#333", borderRadius: 3 }}><div style={{ height: "100%", width: `${dayPct}%`, background: dayPct === 100 ? "#4ECDC4" : "#45B7D1", borderRadius: 3, transition: "width 0.3s" }} /></div></div>
           <WeeklyChart familyId={family.id} childId={selectedChild.id} tasks={tasks} lang={lang} />
-          <button onClick={() => signOut(auth)} style={{ ...btnStyle, background: "#1a1a1a", color: "#666", width: "100%", marginTop: 8, fontSize: 13, border: "1px solid #333" }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
+          <button onClick={() => childSession ? childLogout() : signOut(auth)} style={{ ...btnStyle, background: "#1a1a1a", color: "#666", width: "100%", marginTop: 8, fontSize: 13, border: "1px solid #333" }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
         </>}
 
         {view === "daily" && <>
@@ -590,12 +688,17 @@ export default function App() {
             <div style={{ display: "flex", gap: 6 }}>{[-50, -10, -5, 5, 10, 50].map(val => <button key={val} onClick={async () => { const nb = (selectedChild.balance || 0) + val; const nt = val > 0 ? (selectedChild.totalEarned || 0) + val : (selectedChild.totalEarned || 0); await store.updateChild(family.id, selectedChild.id, { balance: nb, totalEarned: nt }); setSelectedChild(prev => ({ ...prev, balance: nb, totalEarned: nt })); showToast(`${val > 0 ? "+" : ""}${val}`); }} style={{ ...btnStyle, flex: 1, padding: "10px 2px", fontSize: 12, background: val > 0 ? "#1a3a2a" : "#3a1a1a", color: val > 0 ? "#4ECDC4" : "#FF6B6B" }}>{val > 0 ? "+" : ""}{val}</button>)}</div>
           </div>
           <button onClick={() => signOut(auth)} style={{ ...btnStyle, background: "#3a1a1a", color: "#FF6B6B", width: "100%", marginBottom: 16 }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
+          <div style={cardStyle}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#888" }}>🏠 {t("Aile Kodu", "Familiencode")}</div>
+            <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 8, color: "#FFD700", textAlign: "center" }}>{family?.familyCode || "—"}</div>
+            <div style={{ fontSize: 11, color: "#555", textAlign: "center", marginTop: 4 }}>{t("Çocuklar bu kodla giriş yapar", "Kinder melden sich mit diesem Code an")}</div>
+          </div>
         </>}
       </div>
 
       {/* BOTTOM NAV */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "#0d0d1a", borderTop: "1px solid #333", display: "flex", padding: "8px 0 max(8px, env(safe-area-inset-bottom))", zIndex: 1000 }}>
-        {[{ id: "home", icon: "🏠", l: { tr: "Ana Sayfa", de: "Start" } }, { id: "daily", icon: "📝", l: { tr: "Görevler", de: "Aufgaben" } }, { id: "stats", icon: "📊", l: { tr: "İstatistik", de: "Statistik" } }, { id: "parent", icon: "⚙️", l: { tr: "Ebeveyn", de: "Eltern" } }].map(tab =>
+        {[{ id: "home", icon: "🏠", l: { tr: "Ana Sayfa", de: "Start" } }, { id: "daily", icon: "📝", l: { tr: "Görevler", de: "Aufgaben" } }, { id: "stats", icon: "📊", l: { tr: "İstatistik", de: "Statistik" } }, ...(childSession ? [] : [{ id: "parent", icon: "⚙️", l: { tr: "Ebeveyn", de: "Eltern" } }])].map(tab =>
           <button key={tab.id} onClick={() => { if (tab.id === "parent" && view !== "parent") setShowPin(true); else setView(tab.id); }} style={{ flex: 1, background: "none", border: "none", color: view === tab.id ? "#4ECDC4" : "#666", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 0", fontFamily: "'Nunito', sans-serif" }}><span style={{ fontSize: 22 }}>{tab.icon}</span><span>{tab.l[lang]}</span></button>
         )}
       </div>
