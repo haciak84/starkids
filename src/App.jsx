@@ -442,6 +442,7 @@ export default function App() {
     if (!childName.trim()) { setCodeError(t("Adını gir", "Name eingeben")); return; }
     if (familyCode.trim().length < 4) { setCodeError(t("Geçersiz kod", "Ungültiger Code")); return; }
     setCodeLoading(true); setCodeError("");
+    setUserDoc(null);
     try {
       await signInAnonymously(auth);
       const fam = await store.getFamilyByCode(familyCode.trim().toUpperCase());
@@ -488,6 +489,7 @@ export default function App() {
   const childLogout = () => {
     localStorage.removeItem("sk_child");
     setChildSession(null);
+    setUserDoc(null);
     setFamily(null);
     setChildren([]);
     setSelectedChild(null);
