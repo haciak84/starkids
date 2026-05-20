@@ -428,10 +428,10 @@ export default function App() {
     if (familyCode.trim().length < 4) { setCodeError(t("Geçersiz kod", "Ungültiger Code")); return; }
     setCodeLoading(true); setCodeError("");
     try {
-      const fam = await store.getFamilyByCode(familyCode);
+      const fam = await store.getFamilyByCode(familyCode.trim().toUpperCase());
       if (!fam) { setCodeError(t("Kod bulunamadı", "Code nicht gefunden")); setCodeLoading(false); return; }
       const kids = await store.getChildren(fam.id);
-      let child = kids.find(k => k.name.toLowerCase() === childName.trim().toLowerCase());
+      let child = kids.find(k => k.name.trim().toLowerCase() === childName.trim().toLowerCase());
       if (!child) {
         const av = AVATARS[Math.floor(Math.random() * AVATARS.length)];
         const cId = await store.addChild(fam.id, { name: childName.trim(), avatar: av });
