@@ -340,6 +340,8 @@ export default function App() {
       try {
         setUser(u);
         if (u && !u.isAnonymous) {
+          localStorage.removeItem("sk_child");
+          setChildSession(null);
           const ud = await store.getUser(u.uid);
           setUserDoc(ud);
           if (!ud) setSetupStep("role");
