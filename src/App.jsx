@@ -380,7 +380,18 @@ export default function App() {
           setSelectedChild(kids[0]);
         }
       });
-      store.onTasksSnapshot(familyId, (t) => { if (t?.length > 0) setTasks(t); });
+      store.onTasksSnapshot(familyId, async (t) => {
+        if (t?.length > 0) {
+          // Varsayılan görevlerdeki değişiklikleri otomatik uygula
+          const custom = t.filter(x => !DEFAULT_TASKS.find(d => d.id === x.id));
+          const merged = [...DEFAULT_TASKS, ...custom];
+          const changed = JSON.stringify(merged) !== JSON.stringify(t);
+          if (changed) await store.setTasks(familyId, merged);
+          setTasks(merged);
+        } else {
+          setTasks(DEFAULT_TASKS);
+        }
+      });
       store.onRewardsSnapshot(familyId, (r) => { if (r && Object.keys(r).length > 0) setRewards(r); });
     }
   };
@@ -735,17 +746,6 @@ export default function App() {
           <div style={cardStyle}>
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>🎯 {t("Manuel Puan", "Manuelle Punkte")} — {selectedChild.avatar} {selectedChild.name}</div>
             <div style={{ display: "flex", gap: 6 }}>{[-50, -10, -5, 5, 10, 50].map(val => <button key={val} onClick={async () => { const nb = (selectedChild.balance || 0) + val; const nt = val > 0 ? (selectedChild.totalEarned || 0) + val : (selectedChild.totalEarned || 0); await store.updateChild(family.id, selectedChild.id, { balance: nb, totalEarned: nt }); setSelectedChild(prev => ({ ...prev, balance: nb, totalEarned: nt })); showToast(`${val > 0 ? "+" : ""}${val}`); }} style={{ ...btnStyle, flex: 1, padding: "10px 2px", fontSize: 12, background: val > 0 ? "#1a3a2a" : "#3a1a1a", color: val > 0 ? "#4ECDC4" : "#FF6B6B" }}>{val > 0 ? "+" : ""}{val}</button>)}</div>
-          </div>
-          <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: "#FFA500" }}>🔄 {t("Görev Listesini Güncelle", "Aufgabenliste aktualisieren")}</div>
-            <div style={{ fontSize: 12, color: "#888", marginBottom: 10 }}>{t("Yeni eklenen görevleri ve puan değişikliklerini uygular. Kendi eklediğin görevler silinmez, sadece varsayılan görevler güncellenir.", "Wendet neue Aufgaben und Punktänderungen an.")}</div>
-            <button onClick={async () => {
-              const existing = tasks.filter(t => !DEFAULT_TASKS.find(d => d.id === t.id));
-              const merged = [...DEFAULT_TASKS, ...existing];
-              await store.setTasks(family.id, merged);
-              setTasks(merged);
-              showToast(t("✅ Görevler güncellendi!", "✅ Aufgaben aktualisiert!"));
-            }} style={{ ...btnStyle, background: "#2a2a0a", color: "#FFA500", border: "1px solid #FFA500", width: "100%", fontSize: 13 }}>🔄 {t("Güncelle", "Aktualisieren")}</button>
           </div>
           <button onClick={() => signOut(auth)} style={{ ...btnStyle, background: "#3a1a1a", color: "#FF6B6B", width: "100%", marginBottom: 16 }}>🚪 {t("Çıkış Yap", "Abmelden")}</button>
           <div style={cardStyle}>
