@@ -13,9 +13,9 @@ const LEVELS = [
 ];
 
 const WHEEL_TIERS = [
-  { key: "mini", threshold: 100, label: { tr: "Mini Çark", de: "Mini Rad" }, color: "#4ECDC4" },
-  { key: "orta", threshold: 250, label: { tr: "Orta Çark", de: "Mittleres Rad" }, color: "#45B7D1" },
-  { key: "buyuk", threshold: 500, label: { tr: "Büyük Çark", de: "Großes Rad" }, color: "#FFD700" },
+  { key: "mini", threshold: 200, label: { tr: "Mini Çark", de: "Mini Rad" }, color: "#4ECDC4" },
+  { key: "orta", threshold: 500, label: { tr: "Orta Çark", de: "Mittleres Rad" }, color: "#45B7D1" },
+  { key: "buyuk", threshold: 1000, label: { tr: "Büyük Çark", de: "Großes Rad" }, color: "#FFD700" },
 ];
 
 const CATEGORIES = {
@@ -38,49 +38,49 @@ const STREAK_BONUSES = [
 ];
 
 const DEFAULT_TASKS = [
-  { id: "t1", cat: "bakim", name: { tr: "Diş fırçalama (sabah)", de: "Zähneputzen (morgens)" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t2", cat: "bakim", name: { tr: "Diş fırçalama (akşam)", de: "Zähneputzen (abends)" }, pts: 5, penalty: -5, freq: "daily", active: true },
-  { id: "t3", cat: "bakim", name: { tr: "Gecelik giyerek yatma", de: "Im Schlafanzug schlafen" }, pts: 5, penalty: -5, freq: "daily", active: true },
-  { id: "t4", cat: "bakim", name: { tr: "Tırnak kesme", de: "Nägel schneiden" }, pts: 5, penalty: 0, freq: "weekly", active: true },
-  { id: "t5", cat: "bakim", name: { tr: "Duş alma", de: "Duschen" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t6", cat: "bakim", name: { tr: "Saçını tarama", de: "Haare kämmen" }, pts: 3, penalty: 0, freq: "daily", active: true },
-  { id: "t7", cat: "bakim", name: { tr: "Kirli çamaşırları sepete atma", de: "Schmutzige Wäsche in den Korb" }, pts: 3, penalty: -3, freq: "daily", active: true },
-  { id: "t8", cat: "ev", name: { tr: "Yatak yapma", de: "Bett machen" }, pts: 10, penalty: 0, freq: "daily", active: true },
-  { id: "t9", cat: "ev", name: { tr: "Kahvaltı masası toplama", de: "Frühstückstisch abräumen" }, pts: 5, penalty: -5, freq: "daily", active: true },
-  { id: "t10", cat: "ev", name: { tr: "Akşam yemek masası kurma/toplama", de: "Abendtisch decken/abräumen" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t11", cat: "ev", name: { tr: "Restmüll çıkarma", de: "Restmüll rausbringen" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t12", cat: "ev", name: { tr: "Gelbe Sack / Altpapier ayırma", de: "Gelber Sack / Altpapier trennen" }, pts: 5, penalty: 0, freq: "weekly", active: true },
-  { id: "t13", cat: "ev", name: { tr: "Kurutma makinasından çamaşır alma", de: "Wäsche aus dem Trockner" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t14", cat: "ev", name: { tr: "Odasını toplama/düzenleme", de: "Zimmer aufräumen" }, pts: 10, penalty: 0, freq: "daily", active: true },
-  { id: "t15", cat: "ev", name: { tr: "Bulaşık makinesini boşaltma", de: "Spülmaschine ausräumen" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t16", cat: "ev", name: { tr: "Ayakkabıları düzgün dizme", de: "Schuhe ordentlich hinstellen" }, pts: 3, penalty: 0, freq: "daily", active: true },
-  { id: "t17", cat: "ev", name: { tr: "Balık besleme", de: "Fische füttern" }, pts: 5, penalty: -5, freq: "daily", active: true },
-  { id: "t18", cat: "ev", name: { tr: "Kediyle ilgilenme (mama/su)", de: "Katze versorgen (Futter/Wasser)" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t19", cat: "ev", name: { tr: "Süpürme / Staubsaugen", de: "Staubsaugen" }, pts: 10, penalty: 0, freq: "weekly", active: true },
-  { id: "t20", cat: "egitim", name: { tr: "Ödevi kendi başına yapma", de: "Hausaufgaben selbstständig" }, pts: 10, penalty: 0, freq: "daily", active: true },
-  { id: "t21", cat: "egitim", name: { tr: "Kitap okuma (30dk)", de: "Lesen (30 Min.)" }, pts: 20, penalty: 0, freq: "daily", active: true },
-  { id: "t22", cat: "egitim", name: { tr: "Kitap okuma (1 saat)", de: "Lesen (1 Stunde)" }, pts: 50, penalty: 0, freq: "daily", active: true },
-  { id: "t23", cat: "egitim", name: { tr: "Derslere aktif katılım", de: "Aktive Teilnahme am Unterricht" }, pts: 10, penalty: 0, freq: "daily", active: true },
-  { id: "t24", cat: "egitim", name: { tr: "Sınav notu 1-2", de: "Prüfungsnote 1-2" }, pts: 50, penalty: 0, freq: "once", active: true },
-  { id: "t25", cat: "egitim", name: { tr: "Sınav notu 3", de: "Prüfungsnote 3" }, pts: 20, penalty: 0, freq: "once", active: true },
-  { id: "t26", cat: "egitim", name: { tr: "Schülerhilfe'ye katılım", de: "Schülerhilfe-Teilnahme" }, pts: 10, penalty: 0, freq: "weekly", active: true },
-  { id: "t27", cat: "egitim", name: { tr: "Yeni kelime öğrenme (TR/DE)", de: "Neues Wort lernen (TR/DE)" }, pts: 3, penalty: 0, freq: "daily", active: true },
-  { id: "t28", cat: "egitim", name: { tr: "Satranç oynama/çalışma", de: "Schach spielen/üben" }, pts: 10, penalty: 0, freq: "daily", active: true },
-  { id: "t29", cat: "manevi", name: { tr: "Namaz kılma (her vakit)", de: "Gebet (jedes Mal)" }, pts: 10, penalty: 0, freq: "daily", active: true },
-  { id: "t30", cat: "manevi", name: { tr: "Oruç tutma", de: "Fasten" }, pts: 50, penalty: 0, freq: "daily", active: false },
-  { id: "t31", cat: "manevi", name: { tr: "Dua/zikir yapma", de: "Bittgebet/Dhikr" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t32", cat: "manevi", name: { tr: "Kur'an okuma (15dk)", de: "Koran lesen (15 Min.)" }, pts: 15, penalty: 0, freq: "daily", active: true },
-  { id: "t33", cat: "disiplin", name: { tr: "Ekran süresine uyma", de: "Bildschirmzeit einhalten" }, pts: 10, penalty: -5, freq: "daily", active: true },
-  { id: "t34", cat: "disiplin", name: { tr: "Uyku saatine uyma", de: "Schlafenszeit einhalten" }, pts: 10, penalty: -5, freq: "daily", active: true },
-  { id: "t35", cat: "disiplin", name: { tr: "Söyleneni ilk seferde yapma", de: "Beim ersten Mal hören" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t36", cat: "disiplin", name: { tr: "Arkadaşlarla iyi geçinme", de: "Gut mit Freunden auskommen" }, pts: 5, penalty: 0, freq: "daily", active: true },
-  { id: "t37", cat: "disiplin", name: { tr: "Yalan söylememe", de: "Nicht lügen" }, pts: 10, penalty: -20, freq: "daily", active: true },
-  { id: "t38", cat: "disiplin", name: { tr: "Saygılı konuşma", de: "Respektvoll sprechen" }, pts: 5, penalty: -10, freq: "daily", active: true },
-  { id: "t39", cat: "hobi", name: { tr: "Haftasonu hobi uğraşma", de: "Wochenend-Hobby" }, pts: 20, penalty: 0, freq: "weekly", active: true },
-  { id: "t40", cat: "hobi", name: { tr: "Spor/fiziksel aktivite (30dk)", de: "Sport/Bewegung (30 Min.)" }, pts: 15, penalty: 0, freq: "daily", active: true },
-  { id: "t41", cat: "hobi", name: { tr: "3D printer projesi", de: "3D-Drucker Projekt" }, pts: 20, penalty: 0, freq: "weekly", active: true },
-  { id: "t42", cat: "hobi", name: { tr: "Kodlama/programlama çalışması", de: "Programmieren üben" }, pts: 20, penalty: 0, freq: "weekly", active: true },
-  { id: "t43", cat: "hobi", name: { tr: "Arkadaşla sosyal aktivite", de: "Soziale Aktivität mit Freunden" }, pts: 10, penalty: 0, freq: "weekly", active: true },
+  { id: "t1", cat: "bakim", name: { tr: "Diş fırçalama (sabah)", de: "Zähneputzen (morgens)" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t2", cat: "bakim", name: { tr: "Diş fırçalama (akşam)", de: "Zähneputzen (abends)" }, pts: 3, penalty: -5, freq: "daily", active: true },
+  { id: "t3", cat: "bakim", name: { tr: "Gecelik giyerek yatma", de: "Im Schlafanzug schlafen" }, pts: 3, penalty: -5, freq: "daily", active: true },
+  { id: "t4", cat: "bakim", name: { tr: "Tırnak kesme", de: "Nägel schneiden" }, pts: 3, penalty: 0, freq: "weekly", active: true },
+  { id: "t5", cat: "bakim", name: { tr: "Duş alma", de: "Duschen" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t6", cat: "bakim", name: { tr: "Saçını tarama", de: "Haare kämmen" }, pts: 2, penalty: 0, freq: "daily", active: true },
+  { id: "t7", cat: "bakim", name: { tr: "Kirli çamaşırları sepete atma", de: "Schmutzige Wäsche in den Korb" }, pts: 2, penalty: -3, freq: "daily", active: true },
+  { id: "t8", cat: "ev", name: { tr: "Yatak yapma", de: "Bett machen" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t9", cat: "ev", name: { tr: "Kahvaltı masası toplama", de: "Frühstückstisch abräumen" }, pts: 3, penalty: -5, freq: "daily", active: true },
+  { id: "t10", cat: "ev", name: { tr: "Akşam yemek masası kurma/toplama", de: "Abendtisch decken/abräumen" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t11", cat: "ev", name: { tr: "Restmüll çıkarma", de: "Restmüll rausbringen" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t12", cat: "ev", name: { tr: "Gelbe Sack / Altpapier ayırma", de: "Gelber Sack / Altpapier trennen" }, pts: 3, penalty: 0, freq: "weekly", active: true },
+  { id: "t13", cat: "ev", name: { tr: "Kurutma makinasından çamaşır alma", de: "Wäsche aus dem Trockner" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t14", cat: "ev", name: { tr: "Odasını toplama/düzenleme", de: "Zimmer aufräumen" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t15", cat: "ev", name: { tr: "Bulaşık makinesini boşaltma", de: "Spülmaschine ausräumen" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t16", cat: "ev", name: { tr: "Ayakkabıları düzgün dizme", de: "Schuhe ordentlich hinstellen" }, pts: 2, penalty: 0, freq: "daily", active: true },
+  { id: "t17", cat: "ev", name: { tr: "Balık besleme", de: "Fische füttern" }, pts: 3, penalty: -5, freq: "daily", active: true },
+  { id: "t18", cat: "ev", name: { tr: "Kediyle ilgilenme (mama/su)", de: "Katze versorgen (Futter/Wasser)" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t19", cat: "ev", name: { tr: "Süpürme / Staubsaugen", de: "Staubsaugen" }, pts: 5, penalty: 0, freq: "weekly", active: true },
+  { id: "t20", cat: "egitim", name: { tr: "Ödevi kendi başına yapma", de: "Hausaufgaben selbstständig" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t21", cat: "egitim", name: { tr: "Kitap okuma (30dk)", de: "Lesen (30 Min.)" }, pts: 10, penalty: 0, freq: "daily", active: true },
+  { id: "t22", cat: "egitim", name: { tr: "Kitap okuma (1 saat)", de: "Lesen (1 Stunde)" }, pts: 25, penalty: 0, freq: "daily", active: true },
+  { id: "t23", cat: "egitim", name: { tr: "Derslere aktif katılım", de: "Aktive Teilnahme am Unterricht" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t24", cat: "egitim", name: { tr: "Sınav notu 1-2", de: "Prüfungsnote 1-2" }, pts: 30, penalty: 0, freq: "once", active: true },
+  { id: "t25", cat: "egitim", name: { tr: "Sınav notu 3", de: "Prüfungsnote 3" }, pts: 10, penalty: 0, freq: "once", active: true },
+  { id: "t26", cat: "egitim", name: { tr: "Schülerhilfe'ye katılım", de: "Schülerhilfe-Teilnahme" }, pts: 5, penalty: 0, freq: "weekly", active: true },
+  { id: "t27", cat: "egitim", name: { tr: "Yeni kelime öğrenme (TR/DE)", de: "Neues Wort lernen (TR/DE)" }, pts: 2, penalty: 0, freq: "daily", active: true },
+  { id: "t28", cat: "egitim", name: { tr: "Satranç oynama/çalışma", de: "Schach spielen/üben" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t29", cat: "manevi", name: { tr: "Namaz kılma (her vakit)", de: "Gebet (jedes Mal)" }, pts: 5, penalty: 0, freq: "daily", active: true },
+  { id: "t30", cat: "manevi", name: { tr: "Oruç tutma", de: "Fasten" }, pts: 30, penalty: 0, freq: "daily", active: false },
+  { id: "t31", cat: "manevi", name: { tr: "Dua/zikir yapma", de: "Bittgebet/Dhikr" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t32", cat: "manevi", name: { tr: "Kur'an okuma (15dk)", de: "Koran lesen (15 Min.)" }, pts: 8, penalty: 0, freq: "daily", active: true },
+  { id: "t33", cat: "disiplin", name: { tr: "Ekran süresine uyma", de: "Bildschirmzeit einhalten" }, pts: 5, penalty: -5, freq: "daily", active: true },
+  { id: "t34", cat: "disiplin", name: { tr: "Uyku saatine uyma", de: "Schlafenszeit einhalten" }, pts: 5, penalty: -5, freq: "daily", active: true },
+  { id: "t35", cat: "disiplin", name: { tr: "Söyleneni ilk seferde yapma", de: "Beim ersten Mal hören" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t36", cat: "disiplin", name: { tr: "Arkadaşlarla iyi geçinme", de: "Gut mit Freunden auskommen" }, pts: 3, penalty: 0, freq: "daily", active: true },
+  { id: "t37", cat: "disiplin", name: { tr: "Yalan söylememe", de: "Nicht lügen" }, pts: 5, penalty: -20, freq: "daily", active: true },
+  { id: "t38", cat: "disiplin", name: { tr: "Saygılı konuşma", de: "Respektvoll sprechen" }, pts: 3, penalty: -10, freq: "daily", active: true },
+  { id: "t39", cat: "hobi", name: { tr: "Haftasonu hobi uğraşma", de: "Wochenend-Hobby" }, pts: 10, penalty: 0, freq: "weekly", active: true },
+  { id: "t40", cat: "hobi", name: { tr: "Spor/fiziksel aktivite (30dk)", de: "Sport/Bewegung (30 Min.)" }, pts: 8, penalty: 0, freq: "daily", active: true },
+  { id: "t41", cat: "hobi", name: { tr: "3D printer projesi", de: "3D-Drucker Projekt" }, pts: 10, penalty: 0, freq: "weekly", active: true },
+  { id: "t42", cat: "hobi", name: { tr: "Kodlama/programlama çalışması", de: "Programmieren üben" }, pts: 10, penalty: 0, freq: "weekly", active: true },
+  { id: "t43", cat: "hobi", name: { tr: "Arkadaşla sosyal aktivite", de: "Soziale Aktivität mit Freunden" }, pts: 5, penalty: 0, freq: "weekly", active: true },
 ];
 
 const DEFAULT_REWARDS = {
@@ -509,10 +509,12 @@ export default function App() {
             <div style={{ fontSize: 28 }}>{selectedChild.avatar}</div>
             <div><div style={{ fontSize: 16, fontWeight: 900 }}>{selectedChild.name}</div><div style={{ fontSize: 10, color: "#888" }}>{level.emoji} {level.name[lang]} • 🔥{selectedChild.streakCount || 0}</div></div>
           </div>
-          <div style={{ textAlign: "right" }}><div style={{ fontSize: 26, fontWeight: 900, color: "#FFD700" }}>{balance}</div><div style={{ fontSize: 9, color: "#888" }}>{t("puan", "Punkte")}</div></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button onClick={() => { const nl = lang === "tr" ? "de" : "tr"; setLang(nl); if (family) store.updateFamily(family.id, { lang: nl }); }} style={{ background: "none", border: "1px solid #444", borderRadius: 8, padding: "2px 7px", color: "#888", fontSize: 10, cursor: "pointer" }}>{lang === "tr" ? "DE" : "TR"}</button>
+            <div style={{ textAlign: "right" }}><div style={{ fontSize: 26, fontWeight: 900, color: "#FFD700" }}>{balance}</div><div style={{ fontSize: 9, color: "#888" }}>{t("puan", "Punkte")}</div></div>
+          </div>
         </div>
         <div style={{ marginTop: 6 }}><div style={{ height: 5, background: "#333", borderRadius: 3 }}><div style={{ height: "100%", width: `${Math.min(levelProgress, 100)}%`, background: `linear-gradient(90deg, ${level.color}, #FFD700)`, borderRadius: 3, transition: "width 0.5s" }} /></div></div>
-        <button onClick={() => { const nl = lang === "tr" ? "de" : "tr"; setLang(nl); if (family) store.updateFamily(family.id, { lang: nl }); }} style={{ position: "absolute", top: 10, right: 14, background: "none", border: "1px solid #444", borderRadius: 8, padding: "2px 7px", color: "#888", fontSize: 10, cursor: "pointer" }}>{lang === "tr" ? "DE" : "TR"}</button>
       </div>
 
       {/* CONTENT */}
@@ -592,7 +594,7 @@ export default function App() {
       </div>
 
       {/* BOTTOM NAV */}
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "#0d0d1aee", backdropFilter: "blur(10px)", borderTop: "1px solid #222", display: "flex", padding: "8px 0 max(8px, env(safe-area-inset-bottom))", zIndex: 500 }}>
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "#0d0d1a", borderTop: "1px solid #333", display: "flex", padding: "8px 0 max(8px, env(safe-area-inset-bottom))", zIndex: 1000 }}>
         {[{ id: "home", icon: "🏠", l: { tr: "Ana Sayfa", de: "Start" } }, { id: "daily", icon: "📝", l: { tr: "Görevler", de: "Aufgaben" } }, { id: "stats", icon: "📊", l: { tr: "İstatistik", de: "Statistik" } }, { id: "parent", icon: "⚙️", l: { tr: "Ebeveyn", de: "Eltern" } }].map(tab =>
           <button key={tab.id} onClick={() => { if (tab.id === "parent" && view !== "parent") setShowPin(true); else setView(tab.id); }} style={{ flex: 1, background: "none", border: "none", color: view === tab.id ? "#4ECDC4" : "#666", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 0", fontFamily: "'Nunito', sans-serif" }}><span style={{ fontSize: 22 }}>{tab.icon}</span><span>{tab.l[lang]}</span></button>
         )}
