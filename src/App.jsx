@@ -354,7 +354,11 @@ export default function App() {
 
   const loadFamilyData = async (familyId, childIdToSelect) => {
     if (!familyId) return;
-    const fam = await store.getFamily(familyId);
+    let fam = await store.getFamily(familyId);
+    if (fam && !fam.familyCode) {
+      const code = await store.ensureFamilyCode(familyId);
+      fam = { ...fam, familyCode: code };
+    }
     setFamily(fam);
     if (fam) {
       setLang(fam.lang || "tr");

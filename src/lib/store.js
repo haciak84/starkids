@@ -39,6 +39,15 @@ export async function getFamilyByCode(code) {
   return getFamily(snap.data().familyId);
 }
 
+export async function ensureFamilyCode(familyId) {
+  const fam = await getFamily(familyId);
+  if (fam?.familyCode) return fam.familyCode;
+  const code = genFamilyCode();
+  await updateDoc(doc(db, "families", familyId), { familyCode: code });
+  await setDoc(doc(db, "familyCodes", code), { familyId });
+  return code;
+}
+
 export async function getFamily(familyId) {
   const snap = await getDoc(doc(db, "families", familyId));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
