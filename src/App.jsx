@@ -381,6 +381,25 @@ export default function App() {
     return store.onDayLogSnapshot(family.id, selectedChild.id, todayStr(), setTodayLog);
   }, [family, selectedChild]);
 
+  // Puan erimesi: son çark çevirme 5 günden eskiyse %15 erit
+  useEffect(() => {
+    if (!family || !selectedChild) return;
+    const balance = selectedChild.balance || 0;
+    if (balance < 10) return; // Çok az puan varsa uğraşma
+    const lastSpin = selectedChild.lastSpinDate;
+    if (!lastSpin) return;
+    const daysSince = Math.floor((new Date(todayStr()) - new Date(lastSpin)) / 86400000);
+    const lastDecay = selectedChild.lastDecayDate;
+    if (daysSince >= 5 && lastDecay !== todayStr()) {
+      const loss = Math.floor(balance * 0.15);
+      if (loss < 1) return;
+      const nb = balance - loss;
+      store.updateChild(family.id, selectedChild.id, { balance: nb, lastDecayDate: todayStr() });
+      setSelectedChild(prev => ({ ...prev, balance: nb, lastDecayDate: todayStr() }));
+      setTimeout(() => showToast(`⚠️ ${loss} ${lang === "tr" ? "puan eridi! Çarkı çevir!" : "Punkte verfallen! Rad drehen!"}`), 1000);
+    }
+  }, [selectedChild?.id, family?.id]);
+
   const signInWithGoogle = async () => { try { await signInWithPopup(auth, googleProvider); } catch (e) { if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') { try { await signInWithRedirect(auth, googleProvider); } catch (e2) { showToast("Hata: " + e2.message); } } else { showToast("Hata: " + e.message); } } };
 
   const lookupFamilyCode = async () => {
@@ -454,9 +473,9 @@ export default function App() {
   const handleWheelResult = async (reward, tier) => {
     if (!family || !selectedChild) return;
     const nb = (selectedChild.balance || 0) - tier.threshold;
-    await store.updateChild(family.id, selectedChild.id, { balance: nb });
+    await store.updateChild(family.id, selectedChild.id, { balance: nb, lastSpinDate: todayStr() });
     await store.addWheelSpin(family.id, selectedChild.id, { tier: tier.key, reward: reward.name, date: todayStr() });
-    setSelectedChild(prev => ({ ...prev, balance: nb }));
+    setSelectedChild(prev => ({ ...prev, balance: nb, lastSpinDate: todayStr() }));
     showToast(`🎉 ${reward.name[lang]}`);
   };
 
