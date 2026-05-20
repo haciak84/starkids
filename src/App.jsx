@@ -335,6 +335,14 @@ export default function App() {
 
   useEffect(() => { getRedirectResult(auth).catch(() => {}); }, []);
 
+  // Uygulama açılırken anonim auth — Firestore erişimi için gerekli
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      if (!u) signInAnonymously(auth).catch(() => {});
+    });
+    return unsub;
+  }, []);
+
   useEffect(() => {
     const timeout = setTimeout(() => setAuthLoading(false), 6000);
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -444,7 +452,6 @@ export default function App() {
     setCodeLoading(true); setCodeError("");
     setUserDoc(null);
     try {
-      await signInAnonymously(auth);
       const fam = await store.getFamilyByCode(familyCode.trim().toUpperCase());
       if (!fam) { setCodeError(t("Kod bulunamadı", "Code nicht gefunden")); setCodeLoading(false); return; }
       const kids = await store.getChildren(fam.id);
@@ -470,7 +477,8 @@ export default function App() {
     if (setupPin.length !== 4) { setCodeError(t("4 haneli PIN gir", "4-stellige PIN eingeben")); return; }
     setCodeLoading(true); setCodeError("");
     try {
-      const { user: anonUser } = await signInAnonymously(auth);
+      const anonUser = auth.currentUser;
+      if (!anonUser) throw new Error("Oturum açılamadı");
       const fId = await store.createFamily(anonUser.uid, childName.trim(), "", setupPin);
       await store.setTasks(fId, DEFAULT_TASKS);
       await store.setRewards(fId, DEFAULT_REWARDS);
