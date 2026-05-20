@@ -339,11 +339,23 @@ export default function App() {
     return onAuthStateChanged(auth, async (u) => {
       try {
         setUser(u);
-        if (u) {
+        if (u && !u.isAnonymous) {
           const ud = await store.getUser(u.uid);
           setUserDoc(ud);
           if (!ud) setSetupStep("role");
           else await loadFamilyData(ud.familyId);
+        } else if (u && u.isAnonymous) {
+          const session = JSON.parse(localStorage.getItem("sk_child") || "null");
+          const ud = await store.getUser(u.uid);
+          if (ud?.familyId) {
+            // Anonim ebeveyn (Yeni Aile Kur ile oluşturulmuş)
+            setUserDoc(ud);
+            await loadFamilyData(ud.familyId);
+          } else if (session?.familyId) {
+            // Anonim çocuk
+            setChildSession(session);
+            await loadFamilyData(session.familyId, session.childId);
+          }
         } else {
           const session = JSON.parse(localStorage.getItem("sk_child") || "null");
           if (session?.familyId) {
